@@ -1,6 +1,4 @@
 #!/bin/sh
-# Luke's Auto Rice Boostrapping Script (LARBS)
-# by Luke Smith <luke@lukesmith.xyz>
 # License: GNU GPLv3
 
 ### OPTIONS AND VARIABLES ###
@@ -25,11 +23,6 @@ installpkg(){ pacman --noconfirm --needed -S "$1" >/dev/null 2>&1 ;}
 
 error() { echo "ERROR: $1" ; exit 1;}
 
-welcomemsg() { \
-	dialog --title "Welcome!" --msgbox "Welcome to Luke's Auto-Rice Bootstrapping Script!\\n\\nThis script will automatically install a fully-featured Linux desktop, which I use as my main machine.\\n\\n-Luke" 10 60
-
-	dialog --colors --title "Important Note!" --yes-label "All ready!" --no-label "Return..." --yesno "Be sure the computer you are using has current pacman updates and refreshed Arch keyrings.\\n\\nIf it does not, the installation of some programs might fail." 8 70
-	}
 
 getuserandpass() { \
 	# Prompts user for new username an password.
@@ -45,14 +38,6 @@ getuserandpass() { \
 		pass2=$(dialog --no-cancel --passwordbox "Retype password." 10 60 3>&1 1>&2 2>&3 3>&1)
 	done ;}
 
-usercheck() { \
-	! { id -u "$name" >/dev/null 2>&1; } ||
-	dialog --colors --title "WARNING!" --yes-label "CONTINUE" --no-label "No wait..." --yesno "The user \`$name\` already exists on this system. LARBS can install for a user already existing, but it will \\Zboverwrite\\Zn any conflicting settings/dotfiles on the user account.\\n\\nLARBS will \\Zbnot\\Zn overwrite your user files, documents, videos, etc., so don't worry about that, but only click <CONTINUE> if you don't mind your settings being overwritten.\\n\\nNote also that LARBS will change $name's password to the one you just gave." 14 70
-	}
-
-preinstallmsg() { \
-	dialog --title "Let's get this party started!" --yes-label "Let's go!" --no-label "No, nevermind!" --yesno "The rest of the installation will now be totally automated, so you can sit back and relax.\\n\\nIt will take some time, but when done, you can relax even more with your complete system.\\n\\nNow just press <Let's go!> and the system will begin installation!" 13 60 || { clear; exit 1; }
-	}
 
 adduserandpass() { \
 	# Adds user `$name` with password $pass1.
@@ -140,11 +125,6 @@ systembeepoff() { dialog --infobox "Getting rid of that retarded error beep soun
 	rmmod pcspkr
 	echo "blacklist pcspkr" > /etc/modprobe.d/nobeep.conf ;}
 
-finalize(){ \
-	dialog --infobox "Preparing welcome message..." 4 50
-	dialog --title "All done!" --msgbox "Congrats! Provided there were no hidden errors, the script completed successfully and all the programs and configuration files should be in place.\\n\\nTo run the new graphical environment, log out and log back in as your new user, then run the command \"startx\" to start the graphical environment (it will start automatically in tty1).\\n\\n.t Luke" 12 80
-	}
-
 ### THE ACTUAL SCRIPT ###
 
 ### This is how everything happens in an intuitive format and order.
@@ -152,17 +132,8 @@ finalize(){ \
 # Check if user is root on Arch distro. Install dialog.
 pacman --noconfirm --needed -Sy dialog || error "Are you sure you're running this as the root user, are on an Arch-based distribution and have an internet connection?"
 
-# Welcome user and pick dotfiles.
-welcomemsg || error "User exited."
-
 # Get and verify username and password.
 getuserandpass || error "User exited."
-
-# Give warning if user already exists.
-usercheck || error "User exited."
-
-# Last chance for user to back out before install.
-preinstallmsg || error "User exited."
 
 ### The rest of the script requires no user input.
 
@@ -207,10 +178,7 @@ yes | sudo -u "$name" $aurhelper -S libxft-bgra-git >/dev/null 2>&1
 putgitrepo "$dotfilesrepo" "/home/$name" "$repobranch"
 rm -f "/home/$name/README.md" "/home/$name/LICENSE" "/home/$name/FUNDING.yml"
 # Create default urls file if none exists.
-[ ! -f "/home/$name/.config/newsboat/urls" ] && echo "http://lukesmith.xyz/rss.xml
-https://notrelated.libsyn.com/rss
-https://www.youtube.com/feeds/videos.xml?channel_id=UC2eYFnH61tmytImy1mTYvhA \"~Luke Smith (YouTube)\"
-https://www.archlinux.org/feeds/news/" > "/home/$name/.config/newsboat/urls"
+[ ! -f "/home/$name/.config/newsboat/urls" ] && echo ""
 # make git ignore deleted LICENSE & README.md files
 git update-index --assume-unchanged "/home/$name/README.md" "/home/$name/LICENSE" "/home/$name/FUNDING.yml"
 
